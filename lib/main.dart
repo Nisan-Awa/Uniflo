@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 
 import 'core/adaptive_engine.dart';
 import 'core/uniflow_models.dart';
@@ -19,6 +20,7 @@ class UniFlowApp extends StatelessWidget {
         useMaterial3: true,
         colorSchemeSeed: const Color(0xFF2F5BFF),
         scaffoldBackgroundColor: const Color(0xFFF7F8FC),
+        splashFactory: InkRipple.splashFactory,
         fontFamily: 'Roboto',
       ),
       home: const UniFlowHomePage(),
@@ -118,7 +120,7 @@ class _UniFlowHomePageState extends State<UniFlowHomePage> {
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
-          cacheExtent: 1200,
+          scrollCacheExtent: const ScrollCacheExtent.pixels(1200),
           slivers: [
             SliverToBoxAdapter(
               child: _HeroHeader(
