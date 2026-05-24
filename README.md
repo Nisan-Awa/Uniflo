@@ -1,12 +1,12 @@
 # UniFlow
 
-UniFlow is an adaptive student life companion for Nigerian university students.
+UniFlow is an adaptive life companion with a student-first focus for Nigerian university students and young adults.
 
-It is a Flutter mobile app prototype that helps students manage academic tasks, timetable pressure, study plans, basic budgeting, wellness/routine signals, and campus utility needs through a dashboard that changes based on context.
+It is a Flutter mobile app prototype that helps people manage tasks, daily timelines, focused work, basic budgeting, wellness/routine signals, and practical utility needs through a dashboard that changes based on context.
 
 ## Core idea
 
-Students do not lack apps; they lack structure. UniFlow acts as a lightweight command center for fragmented student life:
+Students and young adults do not lack apps; they lack structure. UniFlow acts as a lightweight command center for fragmented daily life:
 
 - WhatsApp group announcements
 - screenshots and PDFs
@@ -16,6 +16,7 @@ Students do not lack apps; they lack structure. UniFlow acts as a lightweight co
 - budget awareness
 - wellness/burnout signals
 - campus survival information
+- transport, documents, errands, and emergency contacts
 
 ## Adaptive modes
 
@@ -25,6 +26,7 @@ The current prototype includes a rule-based adaptive engine with these modes:
 - **Exam focus mode**: prioritizes revision, urgent tasks, timetable, and rest.
 - **Lite mode**: low-data/low-battery dashboard for unstable Nigerian network/power realities.
 - **Recovery mode**: reduces interface pressure when stress, sleep debt, or missed tasks are high.
+- **Money guard mode**: prioritizes essentials when weekly funds are low.
 - **Campus guide mode**: helps new students find campus essentials quickly.
 - **Project sprint mode**: prioritizes final-year project progress and supervisor-readiness.
 
@@ -32,7 +34,7 @@ The current prototype includes a rule-based adaptive engine with these modes:
 
 The app uses a simple first-principles model:
 
-1. **Student context**: academic season, level, tasks, battery, network, stress, sleep, budget, deadlines.
+1. **User context**: life stage, academic season, level, tasks, battery, network, stress, sleep, budget, deadlines.
 2. **Adaptive decision engine**: determines what matters now and what should be hidden or promoted.
 3. **Adaptive UI**: reorders modules, changes microcopy, reduces interface pressure, and changes visual tone.
 

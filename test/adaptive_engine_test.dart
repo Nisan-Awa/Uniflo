@@ -54,6 +54,34 @@ void main() {
       expect(state.interfacePressure, InterfacePressure.low);
     });
 
+    test('switches to money guard mode when weekly funds are low', () {
+      final context = StudentContext.sample().copyWith(
+        weeklyBudgetLeft: 3000,
+        daysToNextExam: 30,
+        daysToProjectDeadline: 30,
+      );
+
+      final state = AdaptiveEngine().resolve(context);
+
+      expect(state.mode, AdaptiveMode.budgetGuard);
+      expect(state.visibleModules.first, UniModule.budget);
+      expect(state.heroAction.label, contains('essentials'));
+      expect(state.microcopy, contains('Money guard'));
+    });
+
+    test('keeps non-student users out of academic exam mode', () {
+      final context = StudentContext.sample().copyWith(
+        lifeStage: LifeStage.earlyCareer,
+        academicSeason: AcademicSeason.exam,
+        daysToNextExam: 3,
+      );
+
+      final state = AdaptiveEngine().resolve(context);
+
+      expect(state.mode, AdaptiveMode.normal);
+      expect(state.reason, contains('life rhythm'));
+    });
+
     test('switches to campus guide mode for new students', () {
       final context = StudentContext.sample().copyWith(
         studentLevel: StudentLevel.newStudent,

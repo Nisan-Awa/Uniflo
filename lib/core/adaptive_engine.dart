@@ -98,7 +98,32 @@ class AdaptiveEngine {
       );
     }
 
-    if (context.studentLevel == StudentLevel.newStudent) {
+    if (_needsBudgetGuard(context)) {
+      return const AdaptiveState(
+        mode: AdaptiveMode.budgetGuard,
+        reason: 'Weekly money pressure detected.',
+        microcopy:
+            'Money guard: essentials, upcoming commitments, and calm choices come first.',
+        heroAction: HeroAction(
+          label: 'Protect essentials for the week',
+          description:
+              'Check food, transport, data, and one important commitment before spending.',
+          iconCodePoint: 0xe850,
+        ),
+        visibleModules: [
+          UniModule.budget,
+          UniModule.tasks,
+          UniModule.timetable,
+          UniModule.transport,
+          UniModule.wellness,
+          UniModule.emergency,
+        ],
+        themeSignal: ThemeSignal.highContrast,
+        interfacePressure: InterfacePressure.balanced,
+      );
+    }
+
+    if (_needsCampusGuide(context)) {
       return const AdaptiveState(
         mode: AdaptiveMode.campusGuide,
         reason: 'New student profile detected.',
@@ -125,13 +150,13 @@ class AdaptiveEngine {
 
     return const AdaptiveState(
       mode: AdaptiveMode.normal,
-      reason: 'Normal academic rhythm.',
+      reason: 'Normal life rhythm.',
       microcopy:
-          'Today mode: tasks, timetable, budget, and wellness stay balanced.',
+          'Today mode: priorities, timeline, money, and wellbeing stay balanced.',
       heroAction: HeroAction(
         label: 'Plan today in 3 minutes',
         description:
-            'Pick your top task, confirm lectures, and protect your energy.',
+            'Pick your top task, confirm your timeline, and protect your energy.',
         iconCodePoint: 0xe8df,
       ),
       visibleModules: [
@@ -161,15 +186,25 @@ class AdaptiveEngine {
   }
 
   bool _needsExamFocus(StudentContext context) {
-    return context.academicSeason == AcademicSeason.exam ||
-        context.daysToNextExam <= 7 ||
-        (context.pendingTasks >= 7 &&
-            context.academicSeason == AcademicSeason.exam);
+    return context.lifeStage == LifeStage.student &&
+        (context.academicSeason == AcademicSeason.exam ||
+            context.daysToNextExam <= 7 ||
+            (context.pendingTasks >= 7 && context.daysToNextExam <= 14));
   }
 
   bool _needsProjectSprint(StudentContext context) {
-    return context.studentLevel == StudentLevel.finalYear &&
+    return context.lifeStage == LifeStage.student &&
+        context.studentLevel == StudentLevel.finalYear &&
         (context.academicSeason == AcademicSeason.projectDefense ||
             context.daysToProjectDeadline <= 14);
+  }
+
+  bool _needsBudgetGuard(StudentContext context) {
+    return context.weeklyBudgetLeft <= 5000;
+  }
+
+  bool _needsCampusGuide(StudentContext context) {
+    return context.lifeStage == LifeStage.student &&
+        context.studentLevel == StudentLevel.newStudent;
   }
 }

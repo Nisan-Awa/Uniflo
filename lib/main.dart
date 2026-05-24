@@ -87,6 +87,29 @@ class _UniFlowHomePageState extends State<UniFlowHomePage> {
     ),
   ];
 
+  late final List<CampusItem> _lifeUtilityItems = const [
+    CampusItem(
+      title: 'Emergency contacts',
+      subtitle: 'Trusted people, clinic, security, and quick help',
+      module: UniModule.emergency,
+    ),
+    CampusItem(
+      title: 'Transport / movement plan',
+      subtitle: 'Routes, pickup points, and safe late movement',
+      module: UniModule.transport,
+    ),
+    CampusItem(
+      title: 'Documents checklist',
+      subtitle: 'IDs, receipts, forms, and important screenshots',
+      module: UniModule.hostelChecklist,
+    ),
+    CampusItem(
+      title: 'Commitment reminders',
+      subtitle: 'Fees, subscriptions, errands, and appointments',
+      module: UniModule.fees,
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final adaptive = _engine.resolve(_context);
@@ -95,18 +118,13 @@ class _UniFlowHomePageState extends State<UniFlowHomePage> {
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
+          cacheExtent: 1200,
           slivers: [
             SliverToBoxAdapter(
               child: _HeroHeader(
                 state: adaptive,
                 palette: palette,
                 contextData: _context,
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: _ContextControls(
-                contextData: _context,
-                onChanged: _updateContext,
               ),
             ),
             SliverPadding(
@@ -120,6 +138,11 @@ class _UniFlowHomePageState extends State<UniFlowHomePage> {
                   const SizedBox(height: 12),
                   ...adaptive.visibleModules.map(
                     (module) => _buildModule(module, adaptive, palette),
+                  ),
+                  const SizedBox(height: 4),
+                  _ContextControls(
+                    contextData: _context,
+                    onChanged: _updateContext,
                   ),
                 ],
               ),
@@ -149,34 +172,28 @@ class _UniFlowHomePageState extends State<UniFlowHomePage> {
       ),
       UniModule.timetable => _ModuleCard(
         icon: Icons.calendar_month_outlined,
-        title: 'Today timetable',
+        title: 'Today timeline',
         accent: palette.accent,
-        child: const Column(
-          children: [
-            _SimpleRow(label: '09:00', value: 'Power Electronics lecture'),
-            _SimpleRow(label: '12:00', value: 'Project work block'),
-            _SimpleRow(label: '16:00', value: 'Revision / assignment buffer'),
-          ],
-        ),
+        child: Column(children: _timelineRows()),
       ),
       UniModule.studyPlan => _ModuleCard(
         icon: Icons.menu_book_outlined,
-        title: 'Adaptive study plan',
+        title: 'Adaptive focus plan',
         accent: palette.accent,
-        child: const Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _InsightPill(text: 'Start with your weakest/nearest course.'),
-            SizedBox(height: 8),
-            _SimpleRow(label: 'Block 1', value: '25 min focused revision'),
-            _SimpleRow(label: 'Break', value: '5 min stretch + water'),
-            _SimpleRow(label: 'Block 2', value: 'Past question / recall test'),
+            _InsightPill(text: _focusInsight()),
+            const SizedBox(height: 8),
+            const _SimpleRow(label: 'Block 1', value: '25 min focused work'),
+            const _SimpleRow(label: 'Break', value: '5 min stretch + water'),
+            _SimpleRow(label: 'Block 2', value: _secondFocusBlock()),
           ],
         ),
       ),
       UniModule.budget => _ModuleCard(
         icon: Icons.account_balance_wallet_outlined,
-        title: 'Simple student budget',
+        title: 'Money clarity',
         accent: palette.accent,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,7 +210,7 @@ class _UniFlowHomePageState extends State<UniFlowHomePage> {
             ),
             const SizedBox(height: 10),
             const Text(
-              'UniFlow shows money gently: clear enough to guide you, not noisy enough to stress you.',
+              'UniFlow keeps money simple: essentials first, pressure visible, no banking complexity.',
             ),
           ],
         ),
@@ -230,12 +247,17 @@ class _UniFlowHomePageState extends State<UniFlowHomePage> {
       UniModule.transport ||
       UniModule.emergency => _ModuleCard(
         icon: Icons.location_city_outlined,
-        title: 'Campus utility',
+        title: _context.lifeStage == LifeStage.student
+            ? 'Campus utility'
+            : 'Life utility',
         accent: palette.accent,
         child: Column(
-          children: _campusItems
-              .map((item) => _CampusTile(item: item))
-              .toList(),
+          children:
+              (_context.lifeStage == LifeStage.student
+                      ? _campusItems
+                      : _lifeUtilityItems)
+                  .map((item) => _CampusTile(item: item))
+                  .toList(),
         ),
       ),
       UniModule.projectTracker => _ModuleCard(
@@ -264,10 +286,43 @@ class _UniFlowHomePageState extends State<UniFlowHomePage> {
     AdaptiveMode.examFocus => 'Exam mode dashboard',
     AdaptiveMode.lite => 'Lite survival dashboard',
     AdaptiveMode.recovery => 'Recovery dashboard',
+    AdaptiveMode.budgetGuard => 'Money guard dashboard',
     AdaptiveMode.campusGuide => 'Campus guide dashboard',
     AdaptiveMode.projectSprint => 'Project sprint dashboard',
     AdaptiveMode.normal => 'Today dashboard',
   };
+
+  List<Widget> _timelineRows() {
+    if (_context.lifeStage == LifeStage.student) {
+      return const [
+        _SimpleRow(label: '09:00', value: 'Power Electronics lecture'),
+        _SimpleRow(label: '12:00', value: 'Project work block'),
+        _SimpleRow(label: '16:00', value: 'Revision / assignment buffer'),
+      ];
+    }
+
+    return const [
+      _SimpleRow(label: '09:00', value: 'Deep work / main commitment'),
+      _SimpleRow(label: '12:00', value: 'Admin, calls, or errands'),
+      _SimpleRow(label: '16:00', value: 'Learning, review, or recovery block'),
+    ];
+  }
+
+  String _focusInsight() {
+    if (_context.lifeStage == LifeStage.student) {
+      return 'Start with your weakest or nearest course.';
+    }
+
+    return 'Start with the commitment that would reduce the most pressure.';
+  }
+
+  String _secondFocusBlock() {
+    if (_context.lifeStage == LifeStage.student) {
+      return 'Past question / recall test';
+    }
+
+    return 'Review progress and prepare the next clear action';
+  }
 
   _Palette _paletteFor(ThemeSignal signal) => switch (signal) {
     ThemeSignal.lowPower => const _Palette(
@@ -311,7 +366,7 @@ class _HeroHeader extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: palette.deep,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
             color: palette.accent.withValues(alpha: 0.25),
@@ -332,7 +387,7 @@ class _HeroHeader extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(99),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
                   'UniFlow',
@@ -376,7 +431,7 @@ class _HeroHeader extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
@@ -420,6 +475,7 @@ class _HeroHeader extends StatelessWidget {
     AdaptiveMode.examFocus => Icons.school_outlined,
     AdaptiveMode.lite => Icons.battery_saver_outlined,
     AdaptiveMode.recovery => Icons.self_improvement_outlined,
+    AdaptiveMode.budgetGuard => Icons.savings_outlined,
     AdaptiveMode.campusGuide => Icons.map_outlined,
     AdaptiveMode.projectSprint => Icons.engineering_outlined,
     AdaptiveMode.normal => Icons.dashboard_customize_outlined,
@@ -429,6 +485,7 @@ class _HeroHeader extends StatelessWidget {
     AdaptiveMode.examFocus => 'EXAM FOCUS',
     AdaptiveMode.lite => 'LITE MODE',
     AdaptiveMode.recovery => 'RECOVERY',
+    AdaptiveMode.budgetGuard => 'MONEY GUARD',
     AdaptiveMode.campusGuide => 'CAMPUS GUIDE',
     AdaptiveMode.projectSprint => 'PROJECT SPRINT',
     AdaptiveMode.normal => 'NORMAL',
@@ -449,7 +506,7 @@ class _ContextControls extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: const Color(0xFFE4E7EC)),
       ),
       child: Column(
@@ -461,7 +518,7 @@ class _ContextControls extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           const Text(
-            'Tap these to see the Gen UI/adaptive dashboard change.',
+            'Tap these to see the dashboard respond to school, money, power, and wellbeing context.',
             style: TextStyle(color: Color(0xFF667085)),
           ),
           const SizedBox(height: 12),
@@ -473,8 +530,10 @@ class _ContextControls extends StatelessWidget {
                 label: 'Normal',
                 selected:
                     contextData.academicSeason == AcademicSeason.normal &&
+                    contextData.lifeStage == LifeStage.student &&
                     contextData.batteryLevel > 15 &&
-                    contextData.stressLevel < 5,
+                    contextData.stressLevel < 5 &&
+                    contextData.weeklyBudgetLeft > 5000,
                 onTap: () => onChanged((c) => StudentContext.sample()),
               ),
               _ModeChip(
@@ -482,6 +541,7 @@ class _ContextControls extends StatelessWidget {
                 selected: contextData.academicSeason == AcademicSeason.exam,
                 onTap: () => onChanged(
                   (c) => c.copyWith(
+                    lifeStage: LifeStage.student,
                     academicSeason: AcademicSeason.exam,
                     pendingTasks: 9,
                     daysToNextExam: 3,
@@ -504,6 +564,21 @@ class _ContextControls extends StatelessWidget {
                 ),
               ),
               _ModeChip(
+                label: 'Low budget',
+                selected: contextData.weeklyBudgetLeft <= 5000,
+                onTap: () => onChanged(
+                  (c) => c.copyWith(
+                    weeklyBudgetLeft: 2800,
+                    batteryLevel: 62,
+                    networkQuality: NetworkQuality.good,
+                    stressLevel: 3,
+                    academicSeason: AcademicSeason.normal,
+                    daysToNextExam: 24,
+                    daysToProjectDeadline: 40,
+                  ),
+                ),
+              ),
+              _ModeChip(
                 label: 'Burnout',
                 selected: contextData.stressLevel >= 5,
                 onTap: () => onChanged(
@@ -517,10 +592,31 @@ class _ContextControls extends StatelessWidget {
                 ),
               ),
               _ModeChip(
-                label: 'New student',
-                selected: contextData.studentLevel == StudentLevel.newStudent,
+                label: 'Work/life',
+                selected: contextData.lifeStage == LifeStage.earlyCareer,
                 onTap: () => onChanged(
                   (c) => c.copyWith(
+                    lifeStage: LifeStage.earlyCareer,
+                    studentLevel: StudentLevel.returningStudent,
+                    academicSeason: AcademicSeason.normal,
+                    pendingTasks: 6,
+                    stressLevel: 2,
+                    batteryLevel: 76,
+                    networkQuality: NetworkQuality.good,
+                    weeklyBudgetLeft: 22000,
+                    daysToNextExam: 45,
+                    daysToProjectDeadline: 45,
+                  ),
+                ),
+              ),
+              _ModeChip(
+                label: 'New student',
+                selected:
+                    contextData.lifeStage == LifeStage.student &&
+                    contextData.studentLevel == StudentLevel.newStudent,
+                onTap: () => onChanged(
+                  (c) => c.copyWith(
+                    lifeStage: LifeStage.student,
                     studentLevel: StudentLevel.newStudent,
                     academicSeason: AcademicSeason.normal,
                     stressLevel: 2,
@@ -534,6 +630,7 @@ class _ContextControls extends StatelessWidget {
                 selected: contextData.daysToProjectDeadline <= 14,
                 onTap: () => onChanged(
                   (c) => c.copyWith(
+                    lifeStage: LifeStage.student,
                     studentLevel: StudentLevel.finalYear,
                     daysToProjectDeadline: 7,
                     academicSeason: AcademicSeason.projectDefense,
@@ -573,7 +670,7 @@ class _ModeChip extends StatelessWidget {
         color: selected ? const Color(0xFF2F5BFF) : const Color(0xFF475467),
       ),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(99),
+        borderRadius: BorderRadius.circular(8),
         side: BorderSide(
           color: selected ? const Color(0xFF2F5BFF) : const Color(0xFFE4E7EC),
         ),
@@ -602,7 +699,7 @@ class _ModuleCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: const Color(0xFFE4E7EC)),
       ),
       child: Column(
@@ -643,7 +740,7 @@ class _TaskTile extends StatelessWidget {
         color: task.isCritical
             ? const Color(0xFFFFF7ED)
             : const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
@@ -741,7 +838,7 @@ class _InsightPill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
         color: const Color(0xFFF2F4F7),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         text,

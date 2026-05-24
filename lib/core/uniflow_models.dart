@@ -2,6 +2,8 @@ enum AcademicSeason { normal, exam, projectDefense, breakPeriod }
 
 enum NetworkQuality { offline, poor, fair, good }
 
+enum LifeStage { student, earlyCareer, creator, entrepreneur }
+
 enum StudentLevel { newStudent, returningStudent, finalYear }
 
 enum AdaptiveMode {
@@ -9,6 +11,7 @@ enum AdaptiveMode {
   examFocus,
   lite,
   recovery,
+  budgetGuard,
   campusGuide,
   projectSprint,
 }
@@ -36,6 +39,7 @@ enum UniModule {
 class StudentContext {
   const StudentContext({
     required this.studentName,
+    required this.lifeStage,
     required this.studentLevel,
     required this.academicSeason,
     required this.pendingTasks,
@@ -51,6 +55,7 @@ class StudentContext {
   });
 
   final String studentName;
+  final LifeStage lifeStage;
   final StudentLevel studentLevel;
   final AcademicSeason academicSeason;
   final int pendingTasks;
@@ -66,6 +71,7 @@ class StudentContext {
 
   factory StudentContext.sample() => StudentContext(
     studentName: 'Nisan',
+    lifeStage: LifeStage.student,
     studentLevel: StudentLevel.finalYear,
     academicSeason: AcademicSeason.normal,
     pendingTasks: 5,
@@ -82,6 +88,7 @@ class StudentContext {
 
   StudentContext copyWith({
     String? studentName,
+    LifeStage? lifeStage,
     StudentLevel? studentLevel,
     AcademicSeason? academicSeason,
     int? pendingTasks,
@@ -97,6 +104,7 @@ class StudentContext {
   }) {
     return StudentContext(
       studentName: studentName ?? this.studentName,
+      lifeStage: lifeStage ?? this.lifeStage,
       studentLevel: studentLevel ?? this.studentLevel,
       academicSeason: academicSeason ?? this.academicSeason,
       pendingTasks: pendingTasks ?? this.pendingTasks,
